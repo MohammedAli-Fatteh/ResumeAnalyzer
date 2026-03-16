@@ -37,5 +37,4 @@ ResumeAnalyzer is a professional-grade tool designed to intelligently analyze re
    streamlit run app.py
    ```
 
----
-*Created with ❤️ by Abc*
+
