@@ -37,66 +37,40 @@ st.markdown("""
 
 html, body, [class*="css"], .stApp {
     font-family: 'Inter', sans-serif !important;
-}
-#MainMenu, footer { visibility:hidden; }
-header { 
-    background-color: transparent !important;
-}
-/* Hide extra Streamlit header icons but keep sidebar toggle */
-header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"]) {
-    visibility: hidden;
+    background-color: #f0ebe0 !important;
 }
 
-@media (max-width: 768px) {
-    .block-container {
-        padding: 1rem 1rem !important;
-    }
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+
+header[data-testid="stHeader"] {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    position: absolute !important;
+}
+            
+section[data-testid="stAppViewContainer"] > div:first-child {
+    display: none !important;
 }
 
-/* Sidebar */
-[data-testid="stSidebar"] {
-    background-color: #1a1a1a !important;
-    border-right: none !important;
+.stApp > .main > .block-container {
+    padding-top: 0 !important;
 }
-[data-testid="stSidebar"] * { color: #f5f0e6 !important; }
-[data-testid="stSidebar"] .stRadio label {
-    padding: 10px 14px !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-    font-size: 0.95rem !important;
-    cursor: pointer;
-}
-[data-testid="stSidebar"] .stRadio label:hover {
-    background: #2a2a2a !important;
-}
-
-/* Main */
 .block-container {
-    padding: 2rem 2.5rem !important;
+    padding: 0 2.5rem !important;
     max-width: 1100px !important;
 }
 
-/* Prevent login card from becoming too wide */
-.auth-card {
-    max-width: 420px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Better mobile spacing */
-@media (max-width: 768px) {
-    .block-container {
-        padding: 1rem 1rem !important;
-    }
-}
-
-/* Buttons */
+/* ── Buttons ── */
 .stButton > button {
     background: #22c55e !important;
     color: #1a1a1a !important;
     border: none !important;
     border-radius: 50px !important;
-    padding: 0.6rem 2rem !important;
+    padding: 0.65rem 2rem !important;
     font-weight: 800 !important;
     font-size: 0.95rem !important;
     box-shadow: 0 4px 15px rgba(34,197,94,.3) !important;
@@ -108,7 +82,7 @@ header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"
     color: #1a1a1a !important;
 }
 
-/* Inputs */
+/* ── Inputs ── */
 [data-testid="stTextInput"] input,
 [data-testid="stTextArea"] textarea {
     background: #fff !important;
@@ -130,7 +104,7 @@ header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"
     letter-spacing: 0.8px !important;
 }
 
-/* Selectbox */
+/* ── Selectbox ── */
 [data-testid="stSelectbox"] > div > div {
     background: #fff !important;
     border: 2px solid #e5e0d5 !important;
@@ -138,7 +112,7 @@ header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"
     color: #1a1a1a !important;
 }
 
-/* Metrics */
+/* ── Metrics ── */
 [data-testid="stMetric"] {
     background: #fff;
     border-radius: 16px;
@@ -158,12 +132,12 @@ header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"
     font-weight: 900 !important;
 }
 
-/* Progress bar */
+/* ── Progress bar ── */
 [data-testid="stProgress"] > div > div > div > div {
     background: #22c55e !important;
 }
 
-/* Tabs */
+/* ── Tabs (global) ── */
 .stTabs [data-baseweb="tab-list"] {
     background: #ede8dc;
     border-radius: 12px;
@@ -180,14 +154,14 @@ header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"
     color: #f5f0e6 !important;
 }
 
-/* Expander */
+/* ── Expander ── */
 .streamlit-expander {
     border: 1px solid #e5e0d5 !important;
     border-radius: 12px !important;
     background: #fff !important;
 }
 
-/* API key banner */
+/* ── API key banner ── */
 .api-banner {
     background: #fffbeb;
     border: 1px solid #fcd34d;
@@ -197,11 +171,32 @@ header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"
     font-size: 0.9rem;
     color: #92400e;
 }
+
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background-color: #1a1a1a !important;
+    border-right: none !important;
+}
+[data-testid="stSidebar"] * { color: #f5f0e6 !important; }
+[data-testid="stSidebar"] .stRadio label {
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer;
+}
+[data-testid="stSidebar"] .stRadio label:hover {
+    background: #2a2a2a !important;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .block-container { padding: 0 1rem !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ── Session State ─────────────────────────────────────────────────────────────
-# Auto-load Gemini key from .streamlit/secrets.toml (set by developer, invisible to users)
 _backend_key = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, 'secrets') else ""
 
 for k, v in [('logged_in', False), ('user', None),
@@ -209,76 +204,30 @@ for k, v in [('logged_in', False), ('user', None),
     if k not in st.session_state:
         st.session_state[k] = v
 
+
 def inject_theme():
-    """Inject dark-mode CSS overrides when dark mode is active."""
     if st.session_state.dark_mode:
         st.markdown("""
         <style>
-        /* Dark base */
         .stApp, .block-container { background-color: #12141c !important; }
-
-        /* Text */
         .stApp p, .stApp div, .stApp span, .stApp label,
-        .stApp h1, .stApp h2, .stApp h3, .stApp li {
-            color: #cdd6f4 !important;
-        }
-
-        /* Metric cards */
-        [data-testid="stMetric"] {
-            background: #1e2030 !important;
-            border-color: #313244 !important;
-        }
+        .stApp h1, .stApp h2, .stApp h3, .stApp li { color: #cdd6f4 !important; }
+        [data-testid="stMetric"] { background: #1e2030 !important; border-color: #313244 !important; }
         [data-testid="stMetricLabel"] { color: #a6adc8 !important; }
         [data-testid="stMetricValue"] { color: #cdd6f4 !important; }
-
-        /* Custom HTML cards (background:#fff) */
-        div[style*="background:#fff"] {
-            background: #1e2030 !important;
-            border-color: #313244 !important;
-        }
-
-        /* Inline text inside cards */
+        div[style*="background:#fff"] { background: #1e2030 !important; border-color: #313244 !important; }
         div[style*="color:#1a1a1a"] { color: #cdd6f4 !important; }
         div[style*="color:#888"]    { color: #6c7086 !important; }
-
-        /* Inputs */
         [data-testid="stTextInput"] input,
-        [data-testid="stTextArea"] textarea {
-            background: #1e2030 !important;
-            color: #cdd6f4 !important;
-            border-color: #45475a !important;
-        }
+        [data-testid="stTextArea"] textarea { background: #1e2030 !important; color: #cdd6f4 !important; border-color: #45475a !important; }
         [data-testid="stTextInput"] label,
         [data-testid="stTextArea"] label { color: #a6adc8 !important; }
-
-        /* Selectbox */
-        [data-testid="stSelectbox"] > div > div {
-            background: #1e2030 !important;
-            color: #cdd6f4 !important;
-            border-color: #45475a !important;
-        }
-
-        /* Tabs */
+        [data-testid="stSelectbox"] > div > div { background: #1e2030 !important; color: #cdd6f4 !important; border-color: #45475a !important; }
         .stTabs [data-baseweb="tab-list"] { background: #1e2030 !important; }
         .stTabs [data-baseweb="tab"] { color: #a6adc8 !important; }
-        .stTabs [aria-selected="true"] {
-            background: #22c55e !important;
-            color: #12141c !important;
-        }
-
-        /* Expander */
-        .streamlit-expander {
-            background: #1e2030 !important;
-            border-color: #313244 !important;
-        }
-
-        /* File uploader */
-        [data-testid="stFileUploader"] {
-            background: #1e2030 !important;
-            border-color: #45475a !important;
-        }
-
-        /* Info / success / warning boxes */
+        .stTabs [aria-selected="true"] { background: #22c55e !important; color: #12141c !important; }
+        .streamlit-expander { background: #1e2030 !important; border-color: #313244 !important; }
+        [data-testid="stFileUploader"] { background: #1e2030 !important; border-color: #45475a !important; }
         [data-testid="stAlert"] { background: #1e2030 !important; }
         </style>
         """, unsafe_allow_html=True)
@@ -316,7 +265,6 @@ def hero_score(score):
         col = "#f59e0b"; label = "Moderate Match 🔶"
     else:
         col = "#ef4444"; label = "Weak Match ⚠️"
-
     st.markdown(f"""
     <div style="background:#1a1a1a;border-radius:20px;padding:3rem 2rem;
                 text-align:center;margin:1.5rem 0;">
@@ -338,102 +286,119 @@ def page_title(text, subtitle=""):
 # ═══════════════════════════════════════════════════════════
 def login_page():
 
-    c1, c2, c3 = st.columns([0.5, 2, 0.5])
-    with c2:
+    st.markdown("""
+    <style>
 
-        st.markdown("""
-        <style>
+    
+    .stTabs [data-baseweb="tab-panel"] {
+    background-color: transparent !important;
+    padding: 1.2rem 0 0 0 !important;
+}
 
-        /* AUTH CARD */
-        .auth-card {
-            padding:2.5rem 2rem;
-            border-radius:16px;
-            background:#ffffff;
-            box-shadow:0 10px 35px rgba(0,0,0,0.08);
-            margin-top:3rem;
-            margin-bottom:3rem;
-        }
+    /* ── Tab bar: wider gap between Login & Sign Up labels ── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px !important;
+        padding: 5px 6px !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        padding: 0.5rem 1.8rem !important;
+        font-size: 0.95rem !important;
+    }
 
-        /* TITLE */
-        .auth-title{
-            font-size:2.8rem;
-            font-weight:900;
-            letter-spacing:-1px;
-            text-align:center;
-            margin-bottom:0.4rem;
-        }
+    
+    [data-testid="column"]:nth-child(2) > div:first-child > div:first-child {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.09);
+        padding: 2.8rem 2.6rem 3rem 2.6rem !important;
+        margin: 6vh auto 4vh auto;
+    }
+    
+    [data-testid="column"]:nth-child(2) {
+        background: #ffffff !important;
+        border-radius: 24px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.09) !important;
+        padding: 2.8rem 2.6rem 3rem 2.6rem !important;
+        margin: 6vh auto !important;
+    }
+    .e1t8ru6f0:has(.auth-title) {
+    background: #ffffff !important;
+    border-radius: 20px !important;
+    padding: 2.2rem 2.6rem 2rem 2.6rem !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.09) !important;
+    margin: 0 auto 1.5rem auto !important;
+    text-align: center !important;
+    max-width: 460px !important;
+    }
+    
+    .auth-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -1px;
+        text-align: center;
+        color: #1a1a1a;
+        margin: 0 0 0.4rem 0;
+    }
+    .auth-sub {
+        text-align: center;
+        color: #888;
+        font-size: 0.9rem;
+        margin: 0 0 2rem 0;
+        line-height: 1.5;
+    }
 
-        /* SUBTITLE */
-        .auth-sub{
-            text-align:center;
-            color:#777;
-            margin-bottom:1.8rem;
-            font-size:0.95rem;
-        }
+    /* Breathing room between each form field */
+    [data-testid="stTextInput"] {
+        margin-bottom: 0.8rem !important;
+    }
 
-        /* MOBILE RESPONSIVENESS */
-        @media (max-width: 768px){
+    /* Extra gap above the submit button */
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"]:last-child .stButton {
+        margin-top: 0.8rem !important;
+    }
 
-            .auth-card{
-                padding:1.8rem 1.3rem;
-                margin-top:1.5rem;
-                margin-bottom:1.5rem;
-            }
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+    .auth-card {
+        padding: 2rem 1.3rem 2.4rem 1.3rem;
+        border-radius: 16px;
+        margin: 3vh auto 3vh auto;
+    }
+    .auth-title { font-size: 1.8rem !important; letter-spacing: -0.5px !important; }
+    .auth-sub   { font-size: 0.82rem; }
+    .stTabs [data-baseweb="tab"] {
+        padding: 0.45rem 1rem !important;
+        font-size: 0.88rem !important;
+    }
+    .e1t8ru6f0:has(.auth-title) {
+        padding: 1.6rem 1.4rem 1.4rem 1.4rem !important;
+        margin: 0 0.5rem 1.5rem 0.5rem !important;
+    }
+}
 
-            .auth-title{
-                font-size:2rem;
-            }
+    </style>
+    """, unsafe_allow_html=True)
 
-            .auth-sub{
-                font-size:0.85rem;
-            }
+    # Narrow centre column so card doesn't stretch full width on desktop
+    _, mid, _ = st.columns([0.5, 3, 0.5])
 
-            .stTextInput > div > div > input{
-                font-size:0.9rem;
-                padding:0.5rem;
-            }
+    with mid:
 
-            button[kind="secondary"]{
-                width:100%;
-            }
-
-        }
-
-        </style>
-        """, unsafe_allow_html=True)
-
-        # Card start
-        st.markdown('<div class="auth-card">', unsafe_allow_html=True)
-
+        # Brand heading (lives inside the card)
         st.markdown("""
         <div class="auth-title">✦ ResumeAnalyzer</div>
         <div class="auth-sub">AI-powered resume matching for every opportunity</div>
         """, unsafe_allow_html=True)
 
-        tab_l, tab_s = st.tabs(["🔑 Login", "📝 Sign Up"])
+        tab_l, tab_s = st.tabs(["🔑  Login", "📝  Sign Up"])
 
-        # LOGIN TAB
+        # ── LOGIN ────────────────────────────────────────────────────
         with tab_l:
-
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-
-            uname = st.text_input(
-                "Username",
-                key="l_u",
-                placeholder="your username"
-            )
-
-            pwd = st.text_input(
-                "Password",
-                type="password",
-                key="l_p",
-                placeholder="••••••••"
-            )
+            uname = st.text_input("Username", key="l_u", placeholder="Your Username")
+            pwd   = st.text_input("Password", type="password", key="l_p", placeholder="••••••••")
 
             if st.button("Login →", key="btn_login", use_container_width=True):
-
                 u = login_user(uname, pwd)
-
                 if u:
                     st.session_state.logged_in = True
                     st.session_state.user = dict(u)
@@ -441,48 +406,23 @@ def login_page():
                 else:
                     st.error("❌ Invalid username or password.")
 
-        # SIGNUP TAB
+        # ── SIGN UP ──────────────────────────────────────────────────
         with tab_s:
-
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-
-            nu = st.text_input(
-                "Username",
-                key="s_u",
-                placeholder="choose a username"
-            )
-
-            np = st.text_input(
-                "Password",
-                type="password",
-                key="s_p",
-                placeholder="choose a password"
-            )
-
-            cp = st.text_input(
-                "Confirm Password",
-                type="password",
-                key="s_c",
-                placeholder="repeat password"
-            )
+            nu = st.text_input("Username",         key="s_u", placeholder="Choose a username")
+            np = st.text_input("Password",         type="password", key="s_p", placeholder="Choose a password")
+            cp = st.text_input("Confirm Password", type="password", key="s_c", placeholder="Repeat password")
 
             if st.button("Create Account →", key="btn_signup", use_container_width=True):
-
                 if np != cp:
                     st.error("❌ Passwords do not match.")
-
                 elif len(nu) < 3:
                     st.error("❌ Username must be at least 3 characters.")
-
                 elif signup_user(nu, np):
                     st.success("✅ Account created! Please login now.")
-
                 else:
                     st.error("❌ Username already exists.")
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-
+        
 # ═══════════════════════════════════════════════════════════
 # SIDEBAR
 # ═══════════════════════════════════════════════════════════
