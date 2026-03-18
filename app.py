@@ -11,10 +11,24 @@ st.set_page_config(
     page_title="ResumeAnalyzer",
     page_icon="✦",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 init_db()
+
+# ── Session state defaults
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Load Gemini key safely
+if "gemini_key" not in st.session_state:
+    st.session_state.gemini_key = st.secrets.get("GEMINI_API_KEY", "")
 
 # ── Global CSS ─────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -28,8 +42,8 @@ html, body, [class*="css"], .stApp {
 header { 
     background-color: transparent !important;
 }
-/* Ensure sidebar toggle is visible but other Streamlit header items are not */
-header [data-testid="stHeaderActionSet"] {
+/* Hide extra Streamlit header icons but keep sidebar toggle */
+header [data-testid="stHeaderActionSet"] button:not([aria-label="Toggle sidebar"]) {
     visibility: hidden;
 }
 
@@ -58,8 +72,22 @@ header [data-testid="stHeaderActionSet"] {
 
 /* Main */
 .block-container {
-    padding: 2.5rem 3rem !important;
+    padding: 2rem 2.5rem !important;
     max-width: 1100px !important;
+}
+
+/* Prevent login card from becoming too wide */
+.auth-card {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Better mobile spacing */
+@media (max-width: 768px) {
+    .block-container {
+        padding: 1rem 1rem !important;
+    }
 }
 
 /* Buttons */
@@ -309,30 +337,103 @@ def page_title(text, subtitle=""):
 # AUTH PAGE
 # ═══════════════════════════════════════════════════════════
 def login_page():
-    c1, c2, c3 = st.columns([1, 1.6, 1])
+
+    c1, c2, c3 = st.columns([0.5, 2, 0.5])
     with c2:
+
         st.markdown("""
-        <div style="text-align:center;padding:3rem 0 1.5rem;">
-            <style>
-                @media (max-width: 480px) {
-                    .responsive-title { font-size: 2.2rem !important; }
-                    .responsive-subtitle { font-size: 0.9rem !important; }
-                }
-            </style>
-            <div class="responsive-title" style="font-size:3rem;font-weight:900;color:#1a1a1a;letter-spacing:-1px;">✦ ResumeAnalyzer</div>
-            <p class="responsive-subtitle" style="color:#888;margin-top:8px;font-size:1rem;">
-                AI-powered resume matching for every opportunity
-            </p>
-        </div>""", unsafe_allow_html=True)
+        <style>
 
-        tab_l, tab_s = st.tabs([" 🔑  Login ", " 📝  Sign Up "])
+        /* AUTH CARD */
+        .auth-card {
+            padding:2.5rem 2rem;
+            border-radius:16px;
+            background:#ffffff;
+            box-shadow:0 10px 35px rgba(0,0,0,0.08);
+            margin-top:3rem;
+            margin-bottom:3rem;
+        }
 
+        /* TITLE */
+        .auth-title{
+            font-size:2.8rem;
+            font-weight:900;
+            letter-spacing:-1px;
+            text-align:center;
+            margin-bottom:0.4rem;
+        }
+
+        /* SUBTITLE */
+        .auth-sub{
+            text-align:center;
+            color:#777;
+            margin-bottom:1.8rem;
+            font-size:0.95rem;
+        }
+
+        /* MOBILE RESPONSIVENESS */
+        @media (max-width: 768px){
+
+            .auth-card{
+                padding:1.8rem 1.3rem;
+                margin-top:1.5rem;
+                margin-bottom:1.5rem;
+            }
+
+            .auth-title{
+                font-size:2rem;
+            }
+
+            .auth-sub{
+                font-size:0.85rem;
+            }
+
+            .stTextInput > div > div > input{
+                font-size:0.9rem;
+                padding:0.5rem;
+            }
+
+            button[kind="secondary"]{
+                width:100%;
+            }
+
+        }
+
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Card start
+        st.markdown('<div class="auth-card">', unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="auth-title">✦ ResumeAnalyzer</div>
+        <div class="auth-sub">AI-powered resume matching for every opportunity</div>
+        """, unsafe_allow_html=True)
+
+        tab_l, tab_s = st.tabs(["🔑 Login", "📝 Sign Up"])
+
+        # LOGIN TAB
         with tab_l:
-            st.markdown("<br>", unsafe_allow_html=True)
-            uname = st.text_input("Username", key="l_u", placeholder="your username")
-            pwd   = st.text_input("Password", type="password", key="l_p", placeholder="••••••••")
-            if st.button("Login →", key="btn_login"):
+
+            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+
+            uname = st.text_input(
+                "Username",
+                key="l_u",
+                placeholder="your username"
+            )
+
+            pwd = st.text_input(
+                "Password",
+                type="password",
+                key="l_p",
+                placeholder="••••••••"
+            )
+
+            if st.button("Login →", key="btn_login", use_container_width=True):
+
                 u = login_user(uname, pwd)
+
                 if u:
                     st.session_state.logged_in = True
                     st.session_state.user = dict(u)
@@ -340,20 +441,46 @@ def login_page():
                 else:
                     st.error("❌ Invalid username or password.")
 
+        # SIGNUP TAB
         with tab_s:
-            st.markdown("<br>", unsafe_allow_html=True)
-            nu = st.text_input("Username", key="s_u", placeholder="choose a username")
-            np = st.text_input("Password", type="password", key="s_p", placeholder="choose a password")
-            cp = st.text_input("Confirm Password", type="password", key="s_c", placeholder="repeat password")
-            if st.button("Create Account →", key="btn_signup"):
+
+            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+
+            nu = st.text_input(
+                "Username",
+                key="s_u",
+                placeholder="choose a username"
+            )
+
+            np = st.text_input(
+                "Password",
+                type="password",
+                key="s_p",
+                placeholder="choose a password"
+            )
+
+            cp = st.text_input(
+                "Confirm Password",
+                type="password",
+                key="s_c",
+                placeholder="repeat password"
+            )
+
+            if st.button("Create Account →", key="btn_signup", use_container_width=True):
+
                 if np != cp:
                     st.error("❌ Passwords do not match.")
+
                 elif len(nu) < 3:
                     st.error("❌ Username must be at least 3 characters.")
+
                 elif signup_user(nu, np):
                     st.success("✅ Account created! Please login now.")
+
                 else:
                     st.error("❌ Username already exists.")
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════
