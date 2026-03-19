@@ -44,16 +44,16 @@ html, body, [class*="css"], .stApp {
 footer    { visibility: hidden; }
 
 header[data-testid="stHeader"] {
-    display: none !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    visibility: hidden !important;
-    position: absolute !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
 }
-            
-section[data-testid="stAppViewContainer"] > div:first-child {
-    display: none !important;
+
+[data-testid="stDecoration"] { display: none !important; }
+
+[data-testid="stSidebarCollapsedControl"] {
+    display: block !important;
+    visibility: visible !important;
 }
 
 .stApp > .main > .block-container {
@@ -94,6 +94,10 @@ section[data-testid="stAppViewContainer"] > div:first-child {
 [data-testid="stTextArea"] textarea:focus {
     border-color: #22c55e !important;
     box-shadow: 0 0 0 3px rgba(34,197,94,.15) !important;
+}
+[data-testid="stTextInputRootElement"] {
+    border-radius: 10px !important;
+    overflow: hidden !important;
 }
 .stTextInput label, .stTextArea label,
 .stSelectbox label, .stFileUploader label {
@@ -321,7 +325,7 @@ def login_page():
         padding: 2.8rem 2.6rem 3rem 2.6rem !important;
         margin: 6vh auto !important;
     }
-    .e1t8ru6f0:has(.auth-title) {
+    .ey36t7e0:has(.auth-title) {
     background: #ffffff !important;
     border-radius: 20px !important;
     padding: 2.2rem 2.6rem 2rem 2.6rem !important;
@@ -330,6 +334,13 @@ def login_page():
     text-align: center !important;
     max-width: 460px !important;
     }
+    .e16uisa00 {
+    background: #f8f5ef !important;
+    border-radius: 20px !important;
+    border: 1.5px solid #e5e0d5 !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
+    }           
     
     .auth-title {
         font-size: 2.5rem;
